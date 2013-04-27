@@ -69,6 +69,18 @@ class GitHubLoader
     .nodeify(cb)
 
 
+  loadRepo: (repoKey, cb) ->
+    result = repoKey.match(/https:\/\/api.github.com\/repos\/(.*)/)
+    if result?
+      fullname = result[1]
+    else if repoKey.match /\w+\/\w+/
+      fullname = repoKey
+    else
+      cb new Error('invalid repo full name or url')
+      return
+
+    @load "repos/#{fullname}", cb
+
 
   loadStars: (page, cb) ->
     @load "users/#{@username}/starred",
