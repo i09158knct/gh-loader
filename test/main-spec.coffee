@@ -35,7 +35,7 @@ describe 'GitHubLoader', ->
           clientSecret: clientSecret
 
 
-      it 'should be contained into url querystring', ->
+      it 'should be contained into url querystring', (done) ->
         page = 1
 
         # FIXME: this querystring matching is order sensitive
@@ -47,12 +47,13 @@ describe 'GitHubLoader', ->
             "&client_secret=#{clientSecret}" +
             "&page=#{page}"
           )
-          .reply(200, """{}""")
+          .reply(200, """[]""")
 
         loader.loadReceivedEvents page, (err, res) ->
           expect(ghmock.isDone()).to.be.true
           expect(err).to.not.exist
-          expect(res).to.be.an 'object'
+          expect(res).to.be.an 'array'
+          done()
 
 
 
@@ -64,7 +65,7 @@ describe 'GitHubLoader', ->
         username: 'test-user'
 
 
-    it 'should contain User-Agent into request header', ->
+    it 'should contain User-Agent into request header', (done) ->
       ghmock = nock('https://api.github.com')
         .matchHeader('User-Agent', /.*/)
         .get('/rate_limit').reply(200, """
@@ -80,6 +81,7 @@ describe 'GitHubLoader', ->
         expect(ghmock.isDone()).to.be.true
         expect(err).to.not.exist
         expect(res).to.be.an 'object'
+        done()
 
 
 
@@ -91,18 +93,20 @@ describe 'GitHubLoader', ->
         username: 'test-user'
 
 
-    it 'should request received_events for specified page', ->
+    it 'should request received_events for specified page', (done) ->
       page = 5
 
       ghmock = nock('https://api.github.com')
         .matchHeader('User-Agent', /.*/)
         .get("/users/#{loader.username}/received_events?page=#{page}")
-        .reply(200, """{}""")
+        .reply(200, """[]""")
 
       loader.loadReceivedEvents page, (err, res) ->
         expect(ghmock.isDone()).to.be.true
         expect(err).to.not.exist
-        expect(res).to.be.an 'object'
+        expect(res).to.be.an 'array'
+        done()
+
 
 
   describe '#loadAllReceivedEvents', ->
@@ -113,20 +117,81 @@ describe 'GitHubLoader', ->
       loader = new GitHubLoader
         username: 'test-user'
 
-      ghmocks = for i in [1..10]
+      ghmocks = [1..10].map (i) ->
         nock('https://api.github.com')
           .matchHeader('User-Agent', /.*/)
           .get("/users/#{loader.username}/received_events?page=#{i}")
           .reply(200, JSON.stringify [1..30])
 
 
-    it 'should request all received_events pages(1..10)', ->
+    it 'should request all received_events pages(1..10)', (done) ->
       loader.loadAllReceivedEvents (err, res) ->
         for ghmock in ghmocks
           expect(ghmock.isDone()).to.be.true
+        done()
 
 
-    it 'should have 300 received_events', ->
+    it 'should have 300 received_events', (done) ->
       loader.loadAllReceivedEvents (err, res) ->
         expect(err).to.not.exist
         expect(res).to.have.length 300
+        done()
+
+
+
+  describe '#loadStars', ->
+    loader = null
+
+    beforeEach ->
+      loader = new GitHubLoader
+        username: 'test-user'
+
+
+    it 'should request stars for specified page', (done) ->
+      page = 5
+
+      ghmock = nock('https://api.github.com')
+        .matchHeader('User-Agent', /.*/)
+        .get("/users/#{loader.username}/starred?page=#{page}&per_page=100")
+        .reply(200, """[]""")
+
+      loader.loadStars page, (err, res) ->
+        expect(ghmock.isDone()).to.be.true
+        expect(err).to.not.exist
+        expect(res).to.be.an 'array'
+        done()
+
+
+
+  describe '#loadAllStars', ->
+    loader = null
+    ghmocks = null
+
+    beforeEach ->
+      loader = new GitHubLoader
+        username: 'test-user'
+
+      ghmocks = [1..15].map (i) ->
+        nock('https://api.github.com')
+          .matchHeader('User-Agent', /.*/)
+          .get("/users/#{loader.username}/starred?page=#{i}&per_page=100")
+          .reply(200, JSON.stringify [1..100])
+
+      ghmocks = ghmocks.concat [16..20].map (i) ->
+        nock('https://api.github.com')
+          .matchHeader('User-Agent', /.*/)
+          .get("/users/#{loader.username}/starred?page=#{i}&per_page=100")
+          .reply(200, JSON.stringify [])
+
+    it 'should request all stars', (done) ->
+      loader.loadAllStars (err, res) ->
+        for ghmock in ghmocks
+          expect(ghmock.isDone()).to.be.true
+        done()
+
+
+    it 'should have 1500 stars', (done) ->
+      loader.loadAllStars (err, res) ->
+        expect(err).to.not.exist
+        expect(res).to.have.length 1500
+        done()

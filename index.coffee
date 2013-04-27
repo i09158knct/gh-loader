@@ -1,6 +1,6 @@
 request = require 'request'
-qs = require 'querystring'
-Q = require 'q'
+qs      = require 'querystring'
+Q       = require 'q'
 
 
 generateLoadingMethod = (clientId, clientSecret) ->
@@ -53,20 +53,55 @@ class GitHubLoader
       page: page
     , cb
 
+  loadAllReceivedEvents: (cb) ->
+    loadingAll = Q.all [1..10].map (i) =>
+      Q.nfcall @loadReceivedEvents.bind(@), i
+
+    loadingAll.then((results) -> [].concat results...)
+    .nodeify(cb)
+
+
+  loadAllPublicEvents: (cb) ->
+    loadingAll = Q.all [1..10].map (i) =>
+      Q.nfcall @loadPublicEvents.bind(@), i
+
+    loadingAll.then((results) -> [].concat results...)
+    .nodeify(cb)
+
+
+
   loadStars: (page, cb) ->
     @load "users/#{@username}/starred",
       page: page
       per_page: 100
     , cb
 
+  _loadChunkStars: (pages) ->
+    loadingChunk = Q.all pages.map (page) =>
+      Q.nfcall @loadStars.bind(@), page
 
-  loadAllReceivedEvents: (cb) ->
-    loadingAll = Q.all [1..10].map (i) => Q.ninvoke @, 'load',
-      "users/#{@username}/received_events",
-      page: i
+    return loadingChunk.then((results) -> [].concat results...)
 
-    loadingAll.then((results) -> [].concat results...)
-    .nodeify(cb)
+
+  loadAllStars: (cb) ->
+    deferredLoadingAll = Q.defer()
+
+    loopLoading = (acc=[], start=1) =>
+      loading = @_loadChunkStars [start..(start + 9)]
+      loading.then(
+        (stars) ->
+          mergedAcc = acc.concat stars
+          if stars.length == 1000
+            loopLoading mergedAcc, (start + 10)
+          else
+            deferredLoadingAll.resolve mergedAcc
+      ,
+        (reason) ->
+          deferredLoadingAll.reject reason
+      )
+
+    loopLoading()
+    deferredLoadingAll.promise.nodeify(cb)
 
 
 module.exports = GitHubLoader
