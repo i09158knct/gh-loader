@@ -47,17 +47,6 @@ module.exports = (grunt) ->
     'grunt-contrib-watch'
   ].forEach grunt.loadNpmTasks
 
-  grunt.registerTask 'copy-components', ->
-    grunt.file.mkdir 'app/js/lib'
-    component = grunt.file.readJSON 'component.json'
-    for name of component.dependencies
-      grunt.file.copy "components/#{name}/#{name}.js", "app/js/lib/#{name}.js"
-
-
-  grunt.registerTask 'init', [
-    'copy-components'
-  ]
-
   grunt.registerTask 'default', [
     'watch'
   ]
