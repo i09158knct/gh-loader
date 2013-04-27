@@ -36,7 +36,7 @@ module.exports = (grunt) ->
         ].join ' '
         options:
           stdout: true
-          stderr: true
+          stderr: false # this will outputted by grunt
           failOnError: true
 
 
