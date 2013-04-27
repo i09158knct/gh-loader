@@ -1,14 +1,14 @@
 {
   "name": "gh-loader",
-  "version": "0.0.0",
-  "description": "ERROR: No README.md file found!",
-  "main": "lib/index.js",
+  "version": "0.0.1",
+  "description": "Simple GitHub's events and stars loader",
+  "main": "./lib",
   "scripts": {
-    "test": "node_modules/mocha/bin/mocha test/main-spec.coffee --compilers coffee:coffee-script --reporter spec"
+    "test": "./node_modules/mocha/bin/mocha test/main-spec.coffee --compilers coffee:coffee-script --reporter spec"
   },
-  "repository": "",
-  "author": "",
-  "license": "BSD",
+  "repository": "git://github.com/i09158knct/gh-loader.git",
+  "author": "i09158knct",
+  "license": "MIT",
   "dependencies": {
     "request": "~2.20.0",
     "q": "~0.9.3",
