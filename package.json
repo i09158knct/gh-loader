@@ -1,7 +1,7 @@
 {
   "name": "gh-loader",
-  "version": "0.0.1",
-  "description": "Simple GitHub's events and stars loader",
+  "version": "0.0.2",
+  "description": "Simple loader for GitHub API v3",
   "main": "./lib",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha test/main-spec.coffee --compilers coffee:coffee-script --reporter spec"

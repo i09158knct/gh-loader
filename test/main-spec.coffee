@@ -139,6 +139,47 @@ describe 'GitHubLoader', ->
 
 
 
+  describe '#loadRepo', ->
+    loader = null
+    ghmock = null
+    repoInfo =
+      full_name: 'octocat/sample-repo'
+      html_url: 'https://api.github.com/repos/octocat/sample-repo'
+
+    beforeEach ->
+      loader = new GitHubLoader
+        username: 'test-user'
+
+      ghmock = nock('https://api.github.com')
+        .matchHeader('User-Agent', /.*/)
+        .get("/repos/#{repoInfo.full_name}")
+        .reply(200, JSON.stringify repoInfo)
+
+
+    it 'should request repo page with repo full_name', (done) ->
+      loader.loadRepo repoInfo.full_name, (err, res) ->
+        expect(ghmock.isDone()).to.be.true
+        expect(err).to.not.exist
+        expect(res).to.deep.equal repoInfo
+        done()
+
+
+    it 'should request repo page with repo url', (done) ->
+      loader.loadRepo repoInfo.html_url, (err, res) ->
+        expect(ghmock.isDone()).to.be.true
+        expect(err).to.not.exist
+        expect(res).to.deep.equal repoInfo
+        done()
+
+
+    it 'should return error with invalid repo name or url', (done) ->
+      loader.loadRepo 'fjisd jfdjs', (err, res) ->
+        expect(ghmock.isDone()).to.be.false
+        expect(err).to.be.an.instanceof Error
+        expect(res).to.not.exist
+        done()
+
+
   describe '#loadStars', ->
     loader = null
 
