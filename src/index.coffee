@@ -31,7 +31,7 @@ generateLoadingMethod = (clientId, clientSecret) ->
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.75 Safari/535.7'
     , (err, res, body) ->
       return cb? err if err?
-      return cb? [res.statusCode, body] if res.statusCode != 200
+      return cb? new Error([res.statusCode, body]) if res.statusCode != 200
       return cb? null, JSON.parse body
 
 

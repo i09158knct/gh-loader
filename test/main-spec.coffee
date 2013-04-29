@@ -108,6 +108,21 @@ describe 'GitHubLoader', ->
         done()
 
 
+    it 'should return error if server response code is not 200', (done) ->
+      page = 5
+
+      ghmock = nock('https://api.github.com')
+        .matchHeader('User-Agent', /.*/)
+        .get("/users/#{loader.username}/received_events?page=#{page}")
+        .reply(404, JSON.stringify message: 'Not Found')
+
+      loader.loadReceivedEvents page, (err, res) ->
+        expect(ghmock.isDone()).to.be.true
+        expect(err).to.be.instanceof Error
+        expect(res).to.not.exist
+        done()
+
+
 
   describe '#loadAllReceivedEvents', ->
     loader = null
