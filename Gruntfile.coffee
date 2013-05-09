@@ -28,7 +28,7 @@ module.exports = (grunt) ->
 
     shell:
       test:
-        command: do -> [
+        command: [
           './node_modules/mocha/bin/mocha'
           'test/main-spec.coffee'
           '--compilers coffee:coffee-script'
