@@ -5,6 +5,7 @@ Q       = require 'q'
 
 generateLoadingMethod = (clientId, clientSecret) ->
   defaults = {}
+
   if clientId? && clientSecret?
     defaults.client_id = clientId
     defaults.client_secret = clientSecret
@@ -23,6 +24,7 @@ generateLoadingMethod = (clientId, clientSecret) ->
     queries = {}
     (queries[k] = v for k, v of defaults)
     (queries[k] = v for k, v of params)
+
     request
       uri: uri
       qs: queries
@@ -52,6 +54,7 @@ class GitHubLoader
     @load "users/#{@username}/events/public",
       page: page
     , cb
+
 
   loadAllReceivedEvents: (cb) ->
     loadingAll = Q.all [1..10].map (i) =>
@@ -88,7 +91,8 @@ class GitHubLoader
       per_page: 100
     , cb
 
-  _loadChunkStars: (pages) ->
+
+  _loadStarsChunk: (pages) ->
     loadingChunk = Q.all pages.map (page) =>
       Q.nfcall @loadStars.bind(@), page
 
@@ -98,8 +102,8 @@ class GitHubLoader
   loadAllStars: (cb) ->
     deferredLoadingAll = Q.defer()
 
-    loopLoading = (acc=[], start=1) =>
-      loading = @_loadChunkStars [start..(start + 9)]
+    do loopLoading = (acc=[], start=1) =>
+      loading = @_loadStarsChunk [start..(start + 9)]
       loading.then(
         (stars) ->
           mergedAcc = acc.concat stars
@@ -112,7 +116,6 @@ class GitHubLoader
           deferredLoadingAll.reject reason
       )
 
-    loopLoading()
     deferredLoadingAll.promise.nodeify(cb)
 
 
