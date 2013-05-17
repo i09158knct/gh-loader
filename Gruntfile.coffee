@@ -13,7 +13,7 @@ module.exports = (grunt) ->
           'test/**/*'
         ]
         tasks: [
-          'shell:test'
+          'simplemocha'
         ]
 
 
@@ -26,31 +26,23 @@ module.exports = (grunt) ->
         ext: '.js'
 
 
-    shell:
-      test:
-        command: [
-          './node_modules/mocha/bin/mocha'
-          'test/main-spec.coffee'
-          '--compilers coffee:coffee-script'
-          '--reporter spec'
-        ].join ' '
-        options:
-          stdout: true
-          stderr: false # this will outputted by grunt
-          failOnError: true
+    simplemocha:
+      options:
+        reporter: 'spec'
+        compilers: ['coffee:coffee-script']
+      all: ['test/**/*.coffee']
 
 
 
-  [
-    'grunt-shell'
+  grunt.loadNpmTasks task for task in [
     'grunt-contrib-coffee'
     'grunt-contrib-watch'
-  ].forEach grunt.loadNpmTasks
-
-  grunt.registerTask 'default', [
-    'watch'
+    'grunt-simple-mocha'
   ]
 
-  grunt.registerTask 'test', [
-    'shell:test'
-  ]
+
+
+  grunt.registerTask name, targets for name, targets of {
+    'default': ['watch']
+    'test': ['simplemocha']
+  }

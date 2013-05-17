@@ -11,8 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "request": "~2.20.0",
-    "q": "~0.9.3",
-    "coffee-script": "~1.6.2"
+    "q": "~0.9.3"
   },
   "devDependencies": {
     "mocha": "~1.9.0",
@@ -21,6 +20,6 @@
     "grunt-contrib-watch": "~0.3.1",
     "grunt": "~0.4.1",
     "grunt-contrib-coffee": "~0.7.0",
-    "grunt-shell": "~0.2.2"
+    "grunt-simple-mocha": "~0.4.0"
   }
 }
